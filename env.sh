@@ -109,10 +109,26 @@ unset build
 unset build_tmp
 unset cmd
 unset failed
-unset here
 unset gems_src
 unset rake_gem
 unset ruby_src
 unset src
+
+#
+# Hook into a possible parent project's Rake system.
+#
+
+cd "$box_home/.."
+job_hook=$( rake --tasks 2> /dev/null | awk '/ruby_inabox/ {print $2}' )
+if [ "$job_hook" ]; then
+    puts "Executing $job_hook Rake task in parent project"
+    rake "$job_hook"
+else
+    puts "Not invoking 'ruby_inabox' Rake task in parent directory"
+fi
+cd "$here"
+
+unset job_hook
+unset here
 
 # vim: sts=4 sw=4 et
