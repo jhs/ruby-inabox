@@ -32,16 +32,24 @@ whatever is already built will be used.
     # ... Dependencies built
 
     $ which ruby
-    ruby-inabox/build/bin/ruby
+    .../ruby-inabox/build/bin/ruby
 
     $ which gem
-    ruby-inabox/build/bin/gem
+    .../ruby-inabox/build/bin/gem
 
     $ gem list
-    rake
 
-Requirements
-------------
+    *** LOCAL GEMS ***
+
+    rake (0.8.7)
+
+Mac OSX Requirements
+--------------------
+
+Everything you need is included in OSX 10.5 ("Snow Leopard").
+
+Linux Requirements
+------------------
 
 Ruby in a Box depends on a few fundamental software packages which either
 ship with the operating system or can be installed trivially.
@@ -49,3 +57,13 @@ ship with the operating system or can be installed trivially.
 On **Ubuntu**, and **Debian**, run the following command:
 
     apt-get -y install make gcc zlib1g-dev libssl-dev libreadline5-dev
+
+
+Un-Installation
+---------------
+
+Uninstalling is very simple:
+
+    rm -rf ruby-inabox/build
+
+To rebuild from scratch, just remove everything and re-source the `env.sh` file.
