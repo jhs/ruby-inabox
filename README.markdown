@@ -56,7 +56,7 @@ ship with the operating system or can be installed trivially.
 
 On **Ubuntu**, and **Debian**, run the following command:
 
-    apt-get -y install make gcc zlib1g-dev libssl-dev libreadline5-dev
+    apt-get -y install make gcc zlib1g-dev libssl-dev libreadline5-dev bison
 
 
 Un-Installation
