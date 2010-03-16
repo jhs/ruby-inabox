@@ -27,22 +27,34 @@ puts ()
 confirm_build ()
 {
     program="$1"
-    expected="$2"
+    expected_path="$2"
+    expected_version="$3"
 
     location=$( which "$program" )
-    if [ "$location" != "$expected" ]; then
-        echo "Failed to find expected build in $expected; location was $location" >&2
+    if [ "$location" != "$expected_path" ]; then
+        echo "Failed to find expected build in $expected_path; location was $location" >&2
         return 1
     else
         if ! "$location" --version > /dev/null; then
             echo "Failed to run build: $location" >&2
             return 1
         else
-            puts "Confirmed build: $location"
+            if [ -z "$expected_version" ]; then
+                # No version equivalence test.
+                puts "Confirmed build: $location"
+            else
+                actual_version=$( $location --version | perl -ne 'print "$1" if(/([\d\.]+)/)' )
+                if [ "$actual_version" != "$expected_version" ]; then
+                    echo "$location $actual_version is not version $expected_version" >&2
+                    return 1
+                else
+                    puts "Confirmed build $expected_version: $location"
+                fi
+            fi
         fi
     fi
 
-    unset program expected location
+    unset actual_version program expected_path expected_version location
 }
 
 here=$( pwd )
@@ -98,11 +110,11 @@ fi
 confirm_build gem "$build/bin/gem" || return 1
 
 # Install Rake.
-if ! confirm_build rake "$build/bin/rake" 2> /dev/null; then
+if ! confirm_build rake "$build/bin/rake" 0.8.7 2> /dev/null; then
     gem install "$rake_gem"
 fi
 
-confirm_build rake "$build/bin/rake" || return 1
+confirm_build rake "$build/bin/rake" 0.8.7 || return 1
 
 # Clean up if everything went okay. (If it didn't go okay, well, you're on your own.)
 unset build
