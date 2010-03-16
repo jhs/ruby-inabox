@@ -50,7 +50,7 @@ box_home=$(dirname $(abspath "$BASH_SOURCE"))
 build="$box_home/build"
 build_tmp="$box_home/tmp_build"
 
-ruby_src=$( echo "$box_home/components"/ruby-* )
+ruby_src=$( perl -e "print [ sort(<$box_home/components/ruby-*>) ] -> [-1]" )   # Change this to specify your preferred Ruby version.
 gems_src=$( echo "$box_home/components"/rubygems-* )
 rake_gem=$( echo "$box_home/components"/rake-*.gem )
 
@@ -69,21 +69,16 @@ fi
 
 # Install Ruby.
 if ! confirm_build ruby "$build/bin/ruby" 2> /dev/null; then
-    puts "Installing Ruby"
+    puts "Installing Ruby from $ruby_src"
 
-    ruby_src=$( echo "$box_home"/components/ruby-* )
-    if [ ! -d "$ruby_src" ]; then
-        echo "Cannot find Ruby source: $ruby_src" >&2
-    else
-        rm -rf "$build_tmp" "$build"
-        mkdir -p "$build_tmp"
+    rm -rf "$build_tmp" "$build"
+    mkdir -p "$build_tmp"
 
-        cd "$build_tmp"
-        "$ruby_src/configure" "--prefix=$build" && make && make install || return 1
+    cd "$build_tmp"
+    "$ruby_src/configure" "--prefix=$build" && make && make install || return 1
 
-        cd "$here"
-        rm -rf "$build_tmp"
-    fi
+    cd "$here"
+    rm -rf "$build_tmp"
 fi
 
 confirm_build ruby "$build/bin/ruby" || return 1
