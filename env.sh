@@ -46,6 +46,11 @@ confirm_build ()
 }
 
 here=$( pwd )
+trap 'return_here' INT TERM EXIT
+return_here () {
+    cd "$here"
+}
+
 box_home=$(dirname $(abspath "$BASH_SOURCE"))
 build="$box_home/build"
 build_tmp="$box_home/tmp_build"
