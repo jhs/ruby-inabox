@@ -58,9 +58,10 @@ confirm_build ()
 }
 
 here=$( pwd )
-trap 'return_here' INT TERM EXIT
+trap 'return_here' INT TERM
 return_here () {
     cd "$here"
+    test -d "$build_tmp" && rm -rf "$build_tmp"
 }
 
 box_home=$(dirname $(abspath "$BASH_SOURCE"))
@@ -92,10 +93,14 @@ if ! confirm_build ruby "$build/bin/ruby" 2> /dev/null; then
     mkdir -p "$build_tmp"
 
     cd "$build_tmp"
-    "$ruby_src/configure" "--prefix=$build" && make && make install || return 1
+    "$ruby_src/configure" "--prefix=$build" && make && make install
+    build_result="$?"
 
-    cd "$here"
-    rm -rf "$build_tmp"
+    return_here
+
+    if [ "$build_result" != 0 ]; then
+        return 1
+    fi
 fi
 
 confirm_build ruby "$build/bin/ruby" || return 1
