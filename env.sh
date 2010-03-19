@@ -61,12 +61,18 @@ here=$( pwd )
 trap 'return_here' INT TERM
 return_here () {
     cd "$here"
-    [ -d "$build_tmp" ] && rm -rf "$build_tmp"
+    [ -d "$workdir" ] && rm -rf "$workdir"
 }
 
 in_temp_dir () {
     cmd="$1"; shift
-    workdir=$( mktemp --tmpdir -d "$cmd.XXXXXX" )
+    template="$cmd.XXXXXX"
+    if mktemp -V | grep --quiet coreutils; then
+        workdir=$( mktemp --tmpdir -d "$template" )
+    else
+        workdir=$( mktemp -t -d "$template" )
+    fi
+
     trap 'return_here' INT TERM
     "$cmd" "$@"
     return_here
@@ -125,7 +131,7 @@ confirm_build rake "$build/bin/rake" 0.8.7 || return 1
 
 # Clean up if everything went okay. (If it didn't go okay, well, you're on your own.)
 unset build
-unset build_tmp
+unset workdir
 unset cmd
 unset failed
 unset gems_src
