@@ -60,7 +60,6 @@ confirm_build ()
 here=$( pwd )
 trap 'return_here' INT TERM
 return_here () {
-    echo returning here
     cd "$here"
     [ -d "$build_tmp" ] && rm -rf "$build_tmp"
 }
@@ -98,13 +97,12 @@ fi
 if ! confirm_build ruby "$build/bin/ruby" 2> /dev/null; then
     puts "Installing Ruby from $ruby_src"
 
-    go () {
-        echo "going to $workdir"
+    ruby_build () {
         cd "$workdir"
         "$ruby_src/configure" "--prefix=$build" && make && make install || return 1
     }
-    in_temp_dir go
-    unset go
+    in_temp_dir ruby_build
+    unset ruby_build
 fi
 
 confirm_build ruby "$build/bin/ruby" || return 1
