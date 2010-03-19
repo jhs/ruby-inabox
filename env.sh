@@ -67,12 +67,13 @@ return_here () {
 in_temp_dir () {
     cmd="$1"; shift
     template="$cmd.XXXXXX"
-    if mktemp -V | grep --quiet coreutils; then
+    if mktemp -V 2> /dev/null | grep --quiet coreutils; then
         workdir=$( mktemp --tmpdir -d "$template" )
     else
-        workdir=$( mktemp -t -d "$template" )
+        workdir=$( mktemp -d -t "$template" )	# -d before -t works on Darwin and old Ubuntu.
     fi
 
+    puts "Doing $cmd in $workdir"
     trap 'return_here' INT TERM
     "$cmd" "$@"
     return_here
