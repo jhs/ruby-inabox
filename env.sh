@@ -60,13 +60,22 @@ confirm_build ()
 here=$( pwd )
 trap 'return_here' INT TERM
 return_here () {
+    echo returning here
     cd "$here"
-    test -d "$build_tmp" && rm -rf "$build_tmp"
+    [ -d "$build_tmp" ] && rm -rf "$build_tmp"
+}
+
+in_temp_dir () {
+    cmd="$1"; shift
+    workdir=$( mktemp --tmpdir -d "$cmd.XXXXXX" )
+    trap 'return_here' INT TERM
+    "$cmd" "$@"
+    return_here
+    trap - INT TERM
 }
 
 box_home=$(dirname $(abspath "$BASH_SOURCE"))
 build="$box_home/build"
-build_tmp="$box_home/tmp_build"
 
 ruby_src=$( perl -e "print [ sort(<$box_home/components/ruby-*>) ] -> [-1]" )   # Change this to specify your preferred Ruby version.
 gems_src=$( echo "$box_home/components"/rubygems-* )
@@ -89,18 +98,13 @@ fi
 if ! confirm_build ruby "$build/bin/ruby" 2> /dev/null; then
     puts "Installing Ruby from $ruby_src"
 
-    rm -rf "$build_tmp" "$build"
-    mkdir -p "$build_tmp"
-
-    cd "$build_tmp"
-    "$ruby_src/configure" "--prefix=$build" && make && make install
-    build_result="$?"
-
-    return_here
-
-    if [ "$build_result" != 0 ]; then
-        return 1
-    fi
+    go () {
+        echo "going to $workdir"
+        cd "$workdir"
+        "$ruby_src/configure" "--prefix=$build" && make && make install || return 1
+    }
+    in_temp_dir go
+    unset go
 fi
 
 confirm_build ruby "$build/bin/ruby" || return 1
