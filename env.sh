@@ -147,10 +147,14 @@ unset src
 cd "$box_home/.."
 job_hook=$( rake --tasks 2> /dev/null | awk '/ruby_inabox/ {print $2}' )
 if [ "$job_hook" ]; then
-    puts "Executing $job_hook Rake task in parent project"
-    rake "$job_hook"
+    if [ -z "$skip_rake" ]; then
+        puts "Executing $job_hook Rake task in parent project"
+        rake "$job_hook"
+    else
+        puts "Skipping $job_hook Rake task in parent project"
+    fi
 else
-    puts "Not invoking 'ruby_inabox' Rake task in parent directory"
+    puts "No 'ruby_inabox' Rake task found in parent directory"
 fi
 cd "$here"
 
