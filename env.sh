@@ -8,13 +8,6 @@ if [ $(basename -- "$0") = 'env.sh' ]; then
     exit 1
 fi
 
-for req in gcc make; do
-    if ! "$req" --version > /dev/null 2> /dev/null; then
-        echo "Cannot run $req" >&2
-        return 1
-    fi
-done
-
 abspath ()
 {
     if [ `uname` = 'Darwin' ]; then
@@ -110,6 +103,13 @@ fi
 # Install Ruby.
 if ! confirm_build ruby "$build/bin/ruby" 2> /dev/null; then
     puts "Installing Ruby from $ruby_src"
+
+    for req in gcc make; do
+        if ! "$req" --version > /dev/null 2> /dev/null; then
+            echo "Cannot run $req" >&2
+            return 1
+        fi
+    done
 
     ruby_build () {
         cd "$workdir"
