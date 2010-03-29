@@ -104,7 +104,7 @@ fi
 if ! confirm_build ruby "$build/bin/ruby" 2> /dev/null; then
     puts "Installing Ruby from $ruby_src"
 
-    for req in gcc make; do
+    for req in gcc make bison; do
         if ! "$req" --version > /dev/null 2> /dev/null; then
             echo "Cannot run $req" >&2
             return 1
