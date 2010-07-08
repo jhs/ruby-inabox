@@ -153,6 +153,13 @@ unset src
 # Hook into a possible parent project's Rake system.
 #
 
+if [ -z "$skip_parent_build" ]; then
+  if ! echo "$PATH" | grep --quiet $(abspath "$box_home/../build"); then
+    puts "Adding parent build to PATH"
+    PATH="$(abspath $box_home/../build)/bin:$PATH"
+  fi
+fi
+
 cd "$box_home/.."
 job_hook=$( rake --tasks 2> /dev/null | awk '/ruby_inabox/ {print $2}' )
 if [ "$job_hook" ]; then
