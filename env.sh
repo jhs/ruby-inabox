@@ -165,11 +165,11 @@ if [ -z "$skip_parent_build" ]; then
 fi
 
 cd "$box_home/.."
-job_hook=$( rake --tasks 2> /dev/null | awk '/ruby_inabox/ {print $2}' )
+job_hook=$( rake --silent --tasks 2> /dev/null | awk '/ruby_inabox/ {print $2}' )
 if [ "$job_hook" ]; then
     if [ -z "$skip_rake" ]; then
         puts "Executing $job_hook Rake task in parent project"
-        rake "$job_hook"
+        rake $extra_rake_args "$job_hook"
     else
         puts "Skipping $job_hook Rake task in parent project"
     fi
