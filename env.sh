@@ -2,6 +2,10 @@
 #
 # Activate the Ruby environment. This script is idempotent and runs silently when not connected to a terminal.
 
+if [ -z "$BASH" ]; then
+    echo "This script is only compatible with Bash" >&2
+    return
+fi
 
 if [ $(basename -- "$0") = 'env.sh' ]; then
     echo "This script should be sourced, not run standalone" >&2
