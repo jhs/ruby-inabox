@@ -191,8 +191,7 @@ rake_hook () {
     cd "$here"
 }
 
-main
-rake_hook
+main && rake_hook
 
 # Clean up if everything went okay. (If it didn't go okay, well, you're on your own.)
 trap - INT TERM
