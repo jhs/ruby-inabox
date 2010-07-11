@@ -96,66 +96,102 @@ in_temp_dir () {
     trap - INT TERM
 }
 
-box_home=$(dirname $(abspath "$original_under"))
-build="$box_home/build"
+main () {
+    box_home=$(dirname $(abspath "$original_under"))
+    build="$box_home/build"
 
-ruby_src=$( perl -e "print [ sort(<$box_home/components/ruby-*>) ] -> [-1]" )   # Change this to specify your preferred Ruby version.
-gems_src=$( echo "$box_home/components"/rubygems-* )
-rake_gem=$( echo "$box_home/components"/rake-*.gem )
+    ruby_src=$( perl -e "print [ sort(<$box_home/components/ruby-*>) ] -> [-1]" )   # Change this to specify your preferred Ruby version.
+    gems_src=$( echo "$box_home/components"/rubygems-* )
+    rake_gem=$( echo "$box_home/components"/rake-*.gem )
 
-# Just double-checking.
-for src in "$ruby_src" "$gems_src" "$rake_gem"; do
-    if [ ! -d "$src" -a ! -f "$src" ]; then
-        echo "Cannot find source: $src" >&2
-        return 1
-    fi
-done
-
-if ! echo "$PATH" | grep --quiet "$build"; then
-    puts 'Adding builds to PATH'
-    PATH="$build/bin:$PATH"
-fi
-
-# Install Ruby.
-if ! confirm_build ruby "$build/bin/ruby" 2> /dev/null; then
-    puts "Installing Ruby from $ruby_src"
-
-    for req in gcc make bison; do
-        if ! "$req" --version > /dev/null 2> /dev/null; then
-            echo "Cannot run $req" >&2
+    # Just double-checking.
+    for src in "$ruby_src" "$gems_src" "$rake_gem"; do
+        if [ ! -d "$src" -a ! -f "$src" ]; then
+            echo "Cannot find source: $src" >&2
             return 1
         fi
     done
 
-    ruby_build () {
-        cd "$workdir"
-        "$ruby_src/configure" "--prefix=$build" && make && make install || return 1
-    }
-    in_temp_dir ruby_build
-    unset ruby_build
-fi
+    if ! echo "$PATH" | grep --quiet "$build"; then
+        puts 'Adding builds to PATH'
+        PATH="$build/bin:$PATH"
+    fi
 
-confirm_build ruby "$build/bin/ruby" || return 1
+    # Install Ruby.
+    if ! confirm_build ruby "$build/bin/ruby" 2> /dev/null; then
+        puts "Installing Ruby from $ruby_src"
 
-# Install RubyGems.
-if ! confirm_build gem "$build/bin/gem" 2> /dev/null; then
-    cd "$gems_src"
-    ruby setup.rb --no-rdoc --no-ri
+        for req in gcc make bison; do
+            if ! "$req" --version > /dev/null 2> /dev/null; then
+                echo "Cannot run $req" >&2
+                return 1
+            fi
+        done
+
+        ruby_build () {
+            cd "$workdir"
+            "$ruby_src/configure" "--prefix=$build" && make && make install || return 1
+        }
+        in_temp_dir ruby_build
+        unset ruby_build
+    fi
+
+    confirm_build ruby "$build/bin/ruby" || return 1
+
+    # Install RubyGems.
+    if ! confirm_build gem "$build/bin/gem" 2> /dev/null; then
+        cd "$gems_src"
+        ruby setup.rb --no-rdoc --no-ri
+        cd "$here"
+    fi
+
+    confirm_build gem "$build/bin/gem" || return 1
+
+    # Install Rake.
+    if ! confirm_build rake "$build/bin/rake" 0.8.7 2> /dev/null; then
+        gem install "$rake_gem"
+    fi
+
+    confirm_build rake "$build/bin/rake" 0.8.7 || return 1
+}
+
+# Hook into a possible parent project's Rake system.
+rake_hook () {
+    if [ -z "$skip_parent_build" ]; then
+      if ! echo "$PATH" | grep --quiet $(abspath "$box_home/../build"); then
+        puts "Adding parent build to PATH"
+        PATH="$(abspath $box_home/../build)/bin:$PATH"
+      fi
+    fi
+
+    cd "$box_home/.."
+    job_hook=$( rake --silent --tasks 2> /dev/null | awk '/ruby_inabox/ {print $2}' )
+    if [ "$job_hook" ]; then
+        if [ -z "$skip_rake" ]; then
+            puts "Executing $job_hook Rake task in parent project"
+            rake $extra_rake_args "$job_hook"
+        else
+            puts "Skipping $job_hook Rake task in parent project"
+        fi
+    else
+        puts "No 'ruby_inabox' Rake task found in parent directory"
+    fi
     cd "$here"
-fi
+}
 
-confirm_build gem "$build/bin/gem" || return 1
-
-# Install Rake.
-if ! confirm_build rake "$build/bin/rake" 0.8.7 2> /dev/null; then
-    gem install "$rake_gem"
-fi
-
-confirm_build rake "$build/bin/rake" 0.8.7 || return 1
+main
+rake_hook
 
 # Clean up if everything went okay. (If it didn't go okay, well, you're on your own.)
 trap - INT TERM
 
+unset abspath
+unset confirm_build
+unset in_temp_dir
+unset main
+unset original_under
+unset puts
+unset rake_hook
 unset build
 unset workdir
 unset cmd
@@ -164,32 +200,6 @@ unset gems_src
 unset rake_gem
 unset ruby_src
 unset src
-
-#
-# Hook into a possible parent project's Rake system.
-#
-
-if [ -z "$skip_parent_build" ]; then
-  if ! echo "$PATH" | grep --quiet $(abspath "$box_home/../build"); then
-    puts "Adding parent build to PATH"
-    PATH="$(abspath $box_home/../build)/bin:$PATH"
-  fi
-fi
-
-cd "$box_home/.."
-job_hook=$( rake --silent --tasks 2> /dev/null | awk '/ruby_inabox/ {print $2}' )
-if [ "$job_hook" ]; then
-    if [ -z "$skip_rake" ]; then
-        puts "Executing $job_hook Rake task in parent project"
-        rake $extra_rake_args "$job_hook"
-    else
-        puts "Skipping $job_hook Rake task in parent project"
-    fi
-else
-    puts "No 'ruby_inabox' Rake task found in parent directory"
-fi
-cd "$here"
-
 unset job_hook
 unset here
 
