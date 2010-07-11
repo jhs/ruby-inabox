@@ -192,6 +192,7 @@ unset main
 unset original_under
 unset puts
 unset rake_hook
+unset return_here
 unset build
 unset workdir
 unset cmd
