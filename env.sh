@@ -17,7 +17,7 @@ fi
 if [ $(basename -- "$0") = 'env.sh' ]; then
     err="This script must be sourced, not run standalone"
 
-    if [ "$ZSH_NAME" ]; then
+    if [ "$ZSH_VERSION" ]; then
         # Re-confirm for Zsh since the above test does not work.
         if [ "$original_under" != "$0" ]; then
             echo "$err" >&2
@@ -51,7 +51,14 @@ confirm_build ()
     expected_path="$2"
     expected_version="$3"
 
-    location=$( /usr/bin/which "$program" )
+    # Zsh's builtin which 
+    if [ "$ZSH_VERSION" ]; then
+        # Disable the Zsh optimizations which would cause trouble.
+        #disable which
+        setopt no_hash_dirs
+    fi
+
+    location=$( which "$program" )
     if [ "$location" != "$expected_path" ]; then
         echo "Failed to find expected build in $expected_path; location was $location" >&2
         #echo "PATH: $PATH"
