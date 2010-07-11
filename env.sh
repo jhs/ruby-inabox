@@ -2,14 +2,30 @@
 #
 # Activate the Ruby environment. This script is idempotent and runs silently when not connected to a terminal.
 
+# Since this script sets the environment, it must be sourced. Running it in a subshell is pointless.
+# Detection confirmed to work for ./env.sh, . env.sh, source env.sh, $SHELL env.sh for all of:
+#  * Bash
+#  * Zsh
+#  * Dash
+original_under="$_"
+if [ $(basename -- "$0") = 'env.sh' ]; then
+    err="This script must be sourced, not run standalone"
+
+    if [ "$ZSH_NAME" ]; then
+        # Re-confirm for Zsh since the above test does not work.
+        if [ "$original_under" != "$0" ]; then
+            echo "$err" >&2
+            exit 1
+        fi
+    else
+        echo "$err" >&2
+        exit 1
+    fi
+fi
+
 if [ -z "$BASH" ]; then
     echo "This script is only compatible with Bash" >&2
     return
-fi
-
-if [ $(basename -- "$0") = 'env.sh' ]; then
-    echo "This script should be sourced, not run standalone" >&2
-    exit 1
 fi
 
 abspath ()
