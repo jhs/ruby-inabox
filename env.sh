@@ -3,8 +3,10 @@
 # Activate the Ruby environment. This script is idempotent and runs silently when not connected to a terminal.
 
 original_under="$_"
-if [ "$override_original_under" ]; then
-    original_under="$override_original_under"
+
+this_file="$BASH_SOURCE"
+if [ -z "$this_file" ]; then
+    this_file="$0"
 fi
 
 # Since this script sets the environment, it must be sourced. Running it in a subshell is pointless.
@@ -109,7 +111,7 @@ insert_in_path () {
 }
 
 main () {
-    box_home=$(dirname $(abspath "$original_under"))
+    box_home=$(dirname $(abspath "$this_file"))
     build="$box_home/build"
 
     ruby_src=$( perl -e "print [ sort(<$box_home/components/ruby-*>) ] -> [-1]" )   # Change this to specify your preferred Ruby version.
@@ -203,6 +205,7 @@ unset original_under
 unset puts
 unset rake_hook
 unset return_here
+unset this_file
 unset build
 unset workdir
 unset cmd
