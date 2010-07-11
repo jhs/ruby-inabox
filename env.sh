@@ -51,9 +51,11 @@ confirm_build ()
     expected_path="$2"
     expected_version="$3"
 
-    location=$( which "$program" )
+    location=$( /usr/bin/which "$program" )
     if [ "$location" != "$expected_path" ]; then
         echo "Failed to find expected build in $expected_path; location was $location" >&2
+        #echo "PATH: $PATH"
+        #echo "path: $path"
         return 1
     else
         if ! "$location" --version > /dev/null; then
