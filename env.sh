@@ -109,19 +109,11 @@ insert_in_path () {
     fi
 
     desired=$(abspath "$desired")
+
     echo "insert_in_path checking $desired in $PATH \$1=$1"
-    if [ "$path" ]; then
-        # Zsh
-        if ! echo "$path" | grep --quiet "$desired"; then
-            puts "Adding to PATH: $desired"
-            path=( $desired $path )
-        fi
-    else
-        # Bash, etc
-        if ! echo "$PATH" | grep --quiet "$desired"; then
-            puts "Adding to PATH: $desired"
-            PATH="$desired:$PATH"
-        fi
+    if ! echo "$PATH" | grep --quiet "$desired"; then
+        puts "Adding to PATH: $desired"
+        PATH="$desired:$PATH"
     fi
 }
 
