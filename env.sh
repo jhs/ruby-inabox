@@ -77,7 +77,7 @@ confirm_build ()
     unset actual_version program expected_path expected_version location
 }
 
-here=$( pwd )
+here="$( pwd )"
 trap 'return_here' INT TERM
 return_here () {
     cd "$here"
