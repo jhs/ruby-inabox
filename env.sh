@@ -107,6 +107,11 @@ insert_in_path () {
     if ! echo "$PATH" | grep --quiet "$desired"; then
         puts "Adding to PATH: $desired"
         PATH="$desired:$PATH"
+
+        # Also add where Zsh can see it.
+        if [ "$path" ]; then
+          path=( $desired $path )
+        fi
     fi
 }
 
