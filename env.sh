@@ -103,14 +103,24 @@ in_temp_dir () {
 
 # Idempotently insert a directory into the search path.
 insert_in_path () {
-    desired=$(abspath "$1")
-    if ! echo "$PATH" | grep --quiet "$desired"; then
-        puts "Adding to PATH: $desired"
-        PATH="$desired:$PATH"
+    desired="$1"
+    if [ ! -d "$desired" ]; then
+        mkdir -p "$desired"
+    fi
 
-        # Also add where Zsh can see it.
-        if [ "$path" ]; then
-          path=( $desired $path )
+    desired=$(abspath "$desired")
+    echo "insert_in_path checking $desired in $PATH \$1=$1"
+    if [ "$path" ]; then
+        # Zsh
+        if ! echo "$path" | grep --quiet "$desired"; then
+            puts "Adding to PATH: $desired"
+            path=( $desired $path )
+        fi
+    else
+        # Bash, etc
+        if ! echo "$PATH" | grep --quiet "$desired"; then
+            puts "Adding to PATH: $desired"
+            PATH="$desired:$PATH"
         fi
     fi
 }
