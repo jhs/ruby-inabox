@@ -112,7 +112,6 @@ insert_in_path () {
 
     desired=$(abspath "$desired")
 
-    echo "insert_in_path checking $desired in $PATH \$1=$1"
     if ! echo "$PATH" | grep --quiet "$desired"; then
         puts "Adding to PATH: $desired"
         PATH="$desired:$PATH"
