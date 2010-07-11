@@ -187,10 +187,8 @@ rake_hook () {
         project_parent="$box_home/.."
     fi
 
-    if [ -z "$skip_parent_build" ]; then
-        if [ -d "$project_parent/build/bin" ]; then
-            insert_in_path "$project_parent/build/bin"
-        fi
+    if [ "$include_parent_build" ]; then
+        insert_in_path "$project_parent/build/bin"
     fi
 
     cd "$project_parent"
