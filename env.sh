@@ -3,6 +3,9 @@
 # Activate the Ruby environment. This script is idempotent and runs silently when not connected to a terminal.
 
 original_under="$_"
+if [ "$override_original_under" ]; then
+    original_under="$override_original_under"
+fi
 
 # Since this script sets the environment, it must be sourced. Running it in a subshell is pointless.
 # Detection confirmed to work for ./env.sh, . env.sh, source env.sh, $SHELL env.sh for all of:
@@ -96,6 +99,15 @@ in_temp_dir () {
     trap - INT TERM
 }
 
+# Idempotently insert a directory into the search path.
+insert_in_path () {
+    desired=$(abspath "$1")
+    if ! echo "$PATH" | grep --quiet "$desired"; then
+        puts "Adding to PATH: $desired"
+        PATH="$desired:$PATH"
+    fi
+}
+
 main () {
     box_home=$(dirname $(abspath "$original_under"))
     build="$box_home/build"
@@ -112,10 +124,7 @@ main () {
         fi
     done
 
-    if ! echo "$PATH" | grep --quiet "$build"; then
-        puts 'Adding builds to PATH'
-        PATH="$build/bin:$PATH"
-    fi
+    insert_in_path "$build/bin"
 
     # Install Ruby.
     if ! confirm_build ruby "$build/bin/ruby" 2> /dev/null; then
@@ -157,14 +166,15 @@ main () {
 
 # Hook into a possible parent project's Rake system.
 rake_hook () {
-    if [ -z "$skip_parent_build" ]; then
-      if ! echo "$PATH" | grep --quiet $(abspath "$box_home/../build"); then
-        puts "Adding parent build to PATH"
-        PATH="$(abspath $box_home/../build)/bin:$PATH"
-      fi
+    if [ -z "$project_parent" ]; then
+        project_parent="$box_home/.."
     fi
 
-    cd "$box_home/.."
+    if [ -z "$skip_parent_build" ]; then
+      insert_in_path "$project_parent/build/bin"
+    fi
+
+    cd "$project_parent"
     job_hook=$( rake --silent --tasks 2> /dev/null | awk '/ruby_inabox/ {print $2}' )
     if [ "$job_hook" ]; then
         if [ -z "$skip_rake" ]; then
