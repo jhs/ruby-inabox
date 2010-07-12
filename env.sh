@@ -167,7 +167,7 @@ main () {
     # Install RubyGems.
     if ! confirm_build gem "$build/bin/gem" 2> /dev/null; then
         cd "$gems_src"
-        ruby setup.rb --no-rdoc --no-ri
+        $(which ruby) setup.rb --no-rdoc --no-ri
         cd "$here"
     fi
 
@@ -175,7 +175,7 @@ main () {
 
     # Install Rake.
     if ! confirm_build rake "$build/bin/rake" 0.8.7 2> /dev/null; then
-        gem install "$rake_gem"
+        $(which gem) install "$rake_gem"
     fi
 
     confirm_build rake "$build/bin/rake" 0.8.7 || return 1
@@ -192,11 +192,11 @@ rake_hook () {
     fi
 
     cd "$project_parent"
-    job_hook=$( rake --silent --tasks 2> /dev/null | awk '/ruby_inabox/ {print $2}' )
+    job_hook=$( $(which rake) --silent --tasks 2> /dev/null | awk '/ruby_inabox/ {print $2}' )
     if [ "$job_hook" ]; then
         if [ -z "$skip_rake" ]; then
             puts "Executing $job_hook Rake task in parent project"
-            rake $extra_rake_args "$job_hook"
+            $(which rake) $extra_rake_args "$job_hook"
         else
             puts "Skipping $job_hook Rake task in parent project"
         fi
