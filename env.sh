@@ -192,7 +192,7 @@ rake_hook () {
     fi
 
     cd "$project_parent"
-    job_hook=$( $(which rake) --silent --tasks 2> /dev/null | awk '/ruby_inabox/ {print $2}' )
+    job_hook=$( $(which rake) --silent --tasks | awk '/ruby_inabox/ {print $2}' )
     if [ "$job_hook" ]; then
         if [ -z "$skip_rake" ]; then
             puts "Executing $job_hook Rake task in parent project"
