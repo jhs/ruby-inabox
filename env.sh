@@ -183,6 +183,10 @@ main () {
 
 # Hook into a possible parent project's Rake system.
 rake_hook () {
+    if [ "$skip_parent" ]; then
+        return
+    fi
+
     if [ -z "$project_parent" ]; then
         project_parent="$box_home/.."
     fi
