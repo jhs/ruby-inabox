@@ -115,10 +115,10 @@ insert_in_path () {
     desired="$1"
     var_name="$2"
 
-    desired=$(abspath "$desired")
     if [ ! -d "$desired" ]; then
         mkdir -p "$desired"
     fi
+    desired=$(abspath "$desired")
 
     if [ -z "$var_name" ]; then
       var_name=PATH
