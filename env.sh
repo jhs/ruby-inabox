@@ -149,7 +149,9 @@ main () {
     done
 
     insert_in_path "$build/bin"
-    insert_in_path "$build/lib/python2.6/site-packages" PYTHONPATH
+    for s_p in "$build"/lib/python?.?/site-packages; do
+      insert_in_path "$s_p" PYTHONPATH
+    done
 
     # Install Ruby.
     if ! confirm_build ruby "$build/bin/ruby" 2> /dev/null; then
