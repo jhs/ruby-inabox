@@ -113,15 +113,22 @@ in_temp_dir () {
 # Idempotently insert a directory into the search path.
 insert_in_path () {
     desired="$1"
+    var_name="$2"
+
+    desired=$(abspath "$desired")
     if [ ! -d "$desired" ]; then
         mkdir -p "$desired"
     fi
 
-    desired=$(abspath "$desired")
+    if [ -z "$var_name" ]; then
+      var_name=PATH
+    fi
 
-    if ! echo "$PATH" | grep --quiet "$desired"; then
-        puts "Adding to PATH: $desired"
-        PATH="$desired:$PATH"
+    current_val=$(eval "echo \$$var_name")
+
+    if ! echo "$current_val" | grep --quiet "$desired"; then
+        puts "Adding to $var_name: $desired"
+        eval "export $var_name='$desired:$current_val'"
     fi
 }
 
@@ -142,6 +149,7 @@ main () {
     done
 
     insert_in_path "$build/bin"
+    insert_in_path "$build/lib/python2.6/site-packages" PYTHONPATH
 
     # Install Ruby.
     if ! confirm_build ruby "$build/bin/ruby" 2> /dev/null; then
