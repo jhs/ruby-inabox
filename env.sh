@@ -205,6 +205,10 @@ rake_hook () {
         insert_in_path "$project_parent/build/bin"
     fi
 
+    if [ -f "$project_parent/.env" ]; then
+        . "$project_parent/.env"
+    fi
+
     cd "$project_parent"
     job_hook=$( $(which rake) --silent --tasks | awk '/ruby_inabox/ {print $2}' )
     if [ "$job_hook" ]; then
