@@ -114,10 +114,11 @@ in_temp_dir () {
 insert_in_path () {
     desired="$1"
     var_name="$2"
+    options="$3"
 
     if [ ! -d "$desired" ]; then
         echo "WARNING: No directory: $desired" >&2
-    else
+    elif [ "$options" != 'exactly' ]; then
         desired=$(abspath "$desired")
     fi
 
@@ -249,5 +250,8 @@ unset ruby_src
 unset src
 unset job_hook
 unset here
+unset var_name
+unset desired
+unset options
 
 # vim: sts=4 sw=4 et
