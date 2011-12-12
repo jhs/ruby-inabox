@@ -116,9 +116,10 @@ insert_in_path () {
     var_name="$2"
 
     if [ ! -d "$desired" ]; then
-        mkdir -p "$desired"
+        echo "WARNING: No directory: $desired" >&2
+    else
+        desired=$(abspath "$desired")
     fi
-    desired=$(abspath "$desired")
 
     if [ -z "$var_name" ]; then
       var_name=PATH
