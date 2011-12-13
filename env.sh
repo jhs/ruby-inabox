@@ -116,10 +116,11 @@ insert_in_path () {
     var_name="$2"
     options="$3"
 
-    if [ ! -d "$desired" ]; then
-        echo "WARNING: No directory: $desired" >&2
-    elif [ "$options" != 'exactly' ]; then
+    if [ -d "$desired" -a "$options" != "exactly" ]; then
         desired=$(abspath "$desired")
+    elif [ "$options" != "exactly" ]; then
+        echo "ERROR: No directory: $desired" >&2
+        return 1
     fi
 
     if [ -z "$var_name" ]; then
