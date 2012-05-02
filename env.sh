@@ -141,10 +141,9 @@ main () {
 
     ruby_src=$( perl -e "print [ sort(<$box_home/components/ruby-*>) ] -> [-1]" )   # Change this to specify your preferred Ruby version.
     gems_src=$( echo "$box_home/components"/rubygems-* )
-    rake_gem=$( echo "$box_home/components"/rake-*.gem )
 
     # Just double-checking.
-    for src in "$ruby_src" "$gems_src" "$rake_gem"; do
+    for src in "$ruby_src" "$gems_src" ; do
         if [ ! -d "$src" -a ! -f "$src" ]; then
             echo "Cannot find source: $src" >&2
             return 1
@@ -186,12 +185,12 @@ main () {
 
     confirm_build gem "$build/bin/gem" || return 1
 
-    # Install Rake.
-    if ! confirm_build rake "$build/bin/rake" 0.8.7 2> /dev/null; then
-        $(which gem) install "$rake_gem"
-    fi
+    # Installing Rake is disabled now that Ruby includes it.
+    #if ! confirm_build rake "$build/bin/rake" 0.8.7 2> /dev/null; then
+    #    $(which gem) install "$rake_gem"
+    #fi
 
-    confirm_build rake "$build/bin/rake" 0.8.7 || return 1
+    confirm_build rake "$build/bin/rake" 0.9.2.2 || return 1
 }
 
 # Hook into a possible parent project's Rake system.
