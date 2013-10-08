@@ -58,6 +58,7 @@ confirm_build ()
         setopt no_hash_dirs
     fi
 
+    hash -r
     location=$( which "$program" )
     if [ "$location" != "$expected_path" ]; then
         echo "Failed to find expected build in $expected_path; location was $location" >&2
