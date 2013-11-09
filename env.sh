@@ -192,7 +192,7 @@ main () {
     #    $(which gem) install "$rake_gem"
     #fi
 
-    confirm_build rake "$build/bin/rake" 0.9.2.2 || return 1
+    confirm_build rake "$build/bin/rake" 0.9.6 || return 1
 }
 
 # Hook into a possible parent project's Rake system.
