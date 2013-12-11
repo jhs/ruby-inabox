@@ -168,12 +168,19 @@ main () {
             fi
         done
 
+        openssl_prefix=$(brew --prefix openssl)
+        if [ "$?" != 0 ]; then
+          openssl_prefix="/usr"
+        fi
+
         ruby_build () {
             cd "$workdir"
-            "$ruby_src/configure" "--prefix=$build" && make && make install || return 1
+            "$ruby_src/configure" "--prefix=$build" "--with-openssl-dir=$openssl_prefix" --disable-option-checking && make && make install || return 1
         }
+
         in_temp_dir ruby_build
         unset ruby_build
+        unset openssl_prefix
     fi
 
     confirm_build ruby "$build/bin/ruby" || return 1
