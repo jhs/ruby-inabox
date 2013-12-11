@@ -168,7 +168,7 @@ main () {
             fi
         done
 
-        openssl_prefix=$(brew --prefix openssl)
+        openssl_prefix=$(brew --prefix openssl 2> /dev/null)
         if [ "$?" != 0 ]; then
           openssl_prefix="/usr"
         fi
